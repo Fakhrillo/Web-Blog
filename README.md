@@ -29,37 +29,17 @@ In future updates, more features and improvements will be added.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/django-blog.git
-cd django-blog
+git clone https://github.com/Fakhrillo/Web-Blog.git
+cd Web-Blog
 ```
 
-### 2. Create a virtual environment using uv
+### 2. Install dependencies
 
 ```bash
-uv venv
+uv sync
 ```
 
-### 3. Activate the virtual environment
-
-* **Linux/MacOS**
-
-```bash
-source .venv/bin/activate
-```
-
-* **Windows (PowerShell)**
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-### 4. Install dependencies
-
-```bash
-uv pip install -r requirements.txt
-```
-
-### 5. Set up environment variables
+### 3. Set up environment variables
 
 Copy the provided `.env.sample` to `.env` and adjust values as needed:
 
@@ -67,27 +47,27 @@ Copy the provided `.env.sample` to `.env` and adjust values as needed:
 cp .env.sample .env
 ```
 
-### 6. Apply database migrations
+### 4. Apply database migrations
 
 ```bash
-python manage.py migrate
+uv run manage.py migrate
 ```
 
-### 7. Create a superuser (admin)
+### 5. Create a superuser (admin)
 
 ```bash
-python manage.py createsuperuser
+uv run manage.py createsuperuser
 ```
 
 Follow the prompts to set up your admin credentials.
 
-### 8. Run the development server
+### 6. Run the development server
 
 ```bash
-python manage.py runserver
+uv run manage.py runserver
 ```
 
-Your blog should now be running at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Your blog should now be running at: [http://127.0.0.1:8000/blog/](http://127.0.0.1:8000/blog/)
 
 ---
 
