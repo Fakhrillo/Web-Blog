@@ -28,4 +28,4 @@ RUN uv run manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Default command: migrate and start Gunicorn
-CMD ["/bin/sh", "-c", "uv run manage.py migrate && uv run gunicorn mysite.wsgi:application --bind 0.0.0.0:8000"]
+CMD ["/bin/sh", "-c", "uv run manage.py migrate && uv run gunicorn mysite.wsgi:application --access-logfile - --bind 0.0.0.0:8000"]

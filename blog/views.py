@@ -2,32 +2,67 @@ from django.shortcuts import render, get_object_or_404
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.views.decorators.http import require_POST
-from blog.models import Post
-from blog.forms import EmailPostForm, CommentForm, SearchForm
-from taggit.models import Tag
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
+from blog.models import Post
+from blog.forms import EmailPostForm, CommentForm
+from taggit.models import Tag
 
-# Create your views here.
+
 def post_list(request, tag_slug=None):
+    """
+    Displays:
+      - All published posts
+      - Optionally filtered by tag
+      - Optionally filtered by search query
+      - Paginated (3 per page)
+    """
     post_list = Post.published.all()
     tag = None
+    query = request.GET.get("query")
+
+    # Tag filtering
     if tag_slug:
         tag = get_object_or_404(Tag, slug=tag_slug)
         post_list = post_list.filter(tags__in=[tag])
-    # Pagination with 3 posts per page
+
+    # Search filtering (header search)
+    if query:
+        try:
+            # PostgreSQL full-text search
+            search_vector = SearchVector("title", weight="A") + SearchVector(
+                "content", weight="B"
+            )
+            search_query = SearchQuery(query)
+            post_list = (
+                post_list.annotate(
+                    search=search_vector, rank=SearchRank(search_vector, search_query)
+                )
+                .filter(rank__gte=0.3)
+                .order_by("-rank", "-publish")
+            )
+        except Exception:
+            # Fallback to icontains if not using Postgres
+            post_list = post_list.filter(
+                Q(title__icontains=query) | Q(content__icontains=query)
+            ).order_by("-publish")
+
+    # Pagination (3 per page)
     paginator = Paginator(post_list, 3)
     page_number = request.GET.get("page", 1)
     try:
         posts = paginator.page(page_number)
     except PageNotAnInteger:
-        # If page_number is not an integer get the first page
         posts = paginator.page(1)
     except EmptyPage:
-        # If page_number is out of range get last page of results
         posts = paginator.page(paginator.num_pages)
-    return render(request, "blog/post/list.html", {"posts": posts, "tag": tag})
+
+    return render(
+        request,
+        "blog/post/list.html",
+        {"posts": posts, "tag": tag, "query": query},
+    )
 
 
 def post_detail(request, year, month, day, post):
@@ -63,20 +98,17 @@ def post_detail(request, year, month, day, post):
 
 def post_share(request, post_id):
     post = get_object_or_404(Post, id=post_id, status="PB")
-
     sent = False
 
     if request.method == "POST":
         form = EmailPostForm(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-
             post_url = request.build_absolute_uri(post.get_absolute_url())
             subject = f"{cd['name']} ({cd['email']}) recommends you read {post.title}"
             message = f"Read {post.title} at {post_url}\n\n{cd['name']}'s comments:\n{cd['comments']}"
             send_mail(subject, message, None, [cd["to"]])
             sent = True
-
     else:
         form = EmailPostForm()
 
@@ -88,7 +120,6 @@ def post_share(request, post_id):
 @require_POST
 def post_comment(request, post_id):
     post = get_object_or_404(Post, id=post_id, status="PB")
-
     comment = None
 
     form = CommentForm(request.POST)
@@ -97,32 +128,8 @@ def post_comment(request, post_id):
         comment.post = post
         comment.save()
 
-        return render(
-            request,
-            "blog/post/comment.html",
-            {"form": form, "post": post, "comment": comment},
-        )
-
-
-def post_search(request):
-    form = SearchForm()
-    query = None
-    results = []
-
-    if "query" in request.GET:
-        form = SearchForm(request.GET)
-        if form.is_valid():
-            query = form.cleaned_data["query"]
-            search_vector = SearchVector("title", weight="A") + SearchVector("content", weight="B")
-            search_query = SearchQuery(query)
-
-            results = Post.published.annotate(
-                search=search_vector,
-                rank=SearchRank(search_vector, search_query),
-            ).filter(rank__gte=0.3).order_by('-rank')
-
     return render(
         request,
-        "blog/post/search.html",
-        {"form": form, "results": results, "query": query},
+        "blog/post/comment.html",
+        {"form": form, "post": post, "comment": comment},
     )
