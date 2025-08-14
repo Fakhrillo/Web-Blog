@@ -1,30 +1,31 @@
 # Django Blog Project
 
-A simple blog application built with **Django**, designed as a starting point for future enhancements. This is **Version 1**, currently using **SQLite** for the database.
-
-In future updates, more features and improvements will be added.
-
----
-
-## Features
-
-* Basic blog setup with Django
-* Environment variables managed with `.env`
-* `.env.sample` provided for easy configuration
-* Uses **SQLite** by default for quick setup
-* Project dependency management with **uv**
+A modern, responsive **Django Blog** application with a polished UI, **PostgreSQL** database, and full **Docker** support.  
+This is **Version 2**, featuring a completely redesigned frontend with **dark mode**, improved search, and a cleaner layout.
 
 ---
 
-## Prerequisites
+## ✨ Features
 
-* Python 3.10+
-* [uv](https://github.com/astral-sh/uv) package manager
-* Git (optional, for cloning)
+- **Responsive, modern UI** with improved typography, layout, and styling
+- **Dark mode** toggle with preference saved in the browser
+- **Full-text search** integrated into the main navigation
+- **PostgreSQL** as the default database
+- **Dockerized setup** for easy deployment
+- **Environment-based configuration** with `.env`
+- Pagination, tag filtering, and related post suggestions
+- Commenting system and share-by-email feature
 
 ---
 
-## Installation & Setup
+## 🛠 Prerequisites
+
+- [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
+- Git (optional, for cloning)
+
+---
+
+## 🚀 Quick Start with Docker
 
 ### 1. Clone the repository
 
@@ -33,60 +34,71 @@ git clone https://github.com/Fakhrillo/Web-Blog.git
 cd Web-Blog
 ```
 
-### 2. Install dependencies
+### 2. Configure environment variables
 
-```bash
-uv sync
-```
-
-### 3. Set up environment variables
-
-Copy the provided `.env.sample` to `.env` and adjust values as needed:
+Copy the sample configuration and update values if needed:
 
 ```bash
 cp .env.sample .env
 ```
 
-### 4. Apply database migrations
+By default, `.env.sample` contains settings for PostgreSQL and Django.
+
+### 3. Build and start the services
 
 ```bash
-uv run manage.py migrate
+docker compose up --build -d
 ```
 
-### 5. Create a superuser (admin)
+This will start:
+- **Django app** (with hot reload in development)
+- **PostgreSQL database**
+
+
+### 4. Create an admin user
 
 ```bash
-uv run manage.py createsuperuser
+docker compose exec web uv run manage.py createsuperuser
 ```
-
-Follow the prompts to set up your admin credentials.
-
-### 6. Run the development server
-
-```bash
-uv run manage.py runserver
-```
-
-Your blog should now be running at: [http://127.0.0.1:8000/blog/](http://127.0.0.1:8000/blog/)
 
 ---
 
-## Usage
+## 📍 Access the App
 
-* Visit `/admin` to log in as the superuser and manage blog posts.
-* Visit the home page to view the list of posts.
-* Add, edit, or delete blog posts through the Django admin interface.
-
----
-
-## Notes
-
-* **Current Version:** 1.0
-* **Database:** SQLite (will be replaced or made configurable in future versions)
-* This README will be updated as new features are added.
+- Blog: [http://localhost:8000/blog/](http://localhost:8000/blog/)  
+- Admin: [http://localhost:8000/admin/](http://localhost:8000/admin/)
 
 ---
 
-## License
+## 💻 Development Notes
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+- The app is pre-configured to use PostgreSQL inside Docker.
+- You can still run Django locally without Docker by installing dependencies and updating `.env` for your local database.
+- Frontend enhancements include:
+  - Centered search bar in the header
+  - Fully styled pagination buttons
+  - Clean post cards with hover effects
+  - Dark mode toggle with smooth transitions
+
+---
+
+## 📂 Project Structure
+
+```
+Web-Blog/
+│── blog/                # Main app with views, models, templates
+│── templates/           # HTML templates
+│── static/              # CSS, JS, images
+│── Dockerfile
+│── docker-compose.yml
+│── .env
+│── .env.sample
+│── manage.py
+```
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License**.  
+See the [LICENSE](LICENSE) file for more details.
